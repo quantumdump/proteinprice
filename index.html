@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>  </title>
+	<script src="js/vue.js"></script>
+	<script src="js/Chart.js"></script>
+	<link rel="stylesheet" type="text/css" href="css/bootstrap.min.css">
+</head>
+<body>
+<div id="app">
+	<h1>{{title}}</h1>
+	<div class="col-sm-12">
+	<div class="col-4">
+			<div class="card">
+		<div class="card-body">
+			<div class="form">
+		<div class="form-group">
+			<div class="form-group">
+				<label for="product">Name of the product</label>
+				<input autofocus class="form-control" type="text" id="product" required v-model="product.product" >
+			</div>
+			<div class="form-group">
+				<label for="price">Product Price</label>
+				<input class="form-control" type="number" required max="100000" id="price" v-model="product.price" >
+			</div>
+			<div class="form-group">
+				<label for="protein">Protein amount</label>
+				<input class="form-control" type="number" required max="1000000" id="protein" v-model="product.proteinAmount" >
+			</div>
+			<div class="form-group" v-if="product.product.length>0 && product.price.length>0 && product.proteinAmount.length>0 ">
+				<button @click="addProduct" class="btn btn-primary">Next Product</button>
+			</div>
+			<div v-else>
+				Fill in the blanks!
+			</div>
+		</div>
+	</div>
+		</div>
+	</div>
+	</div>
+	</div>
+	<div class="col-sm-12" v-if="products.length>0">
+		<div class="col-sm-4 note" v-for="(product, index) in products">
+			<div class="card">
+				<div class="card-block">
+					<button class="close" @click=removeProduct(index)>&times;</button>
+				<h4 class="card-title">{{product.product}}</h4>
+				<p class="card-text">
+					{{calculateCentsPerProteinGram(product.price, product.proteinAmount)}}$ for 1 gram of Protein
+				</p>
+			</div>
+		</div>
+		</div>
+	</div>
+	<div class="card">
+		<h5>Toggle Chart</h5>
+<div class="container" id="toggleHider">
+	<canvas id="myChart"></canvas>
+</div>
+	</div>
+</div>
+<script>
+	
+	productNames = [];
+	pricesPerGram = [];
+	var app = new Vue({
+		el: '#app',
+		data:{
+			///The model of product
+			product: {
+				//round(price*100)=cents
+			price: '',
+			//cents/proteinGrams then result/100(do not round 9.57..)
+			proteinAmount: '',
+			product: ''
+			},
+			////Name of the app
+			title: 'Protein Price',
+			//All products array to populate later///////////////////
+			products: []
+			//////////////////////////////////////////////////////////////////
+		},
+		//////////////////////////////////////
+		methods:{
+			addProduct(){
+				//assign params in form to vars
+				let {product, price, proteinAmount} = this.product;
+				//Add object of vars from form to the array of Products
+				this.products.push({product, price, proteinAmount});
+				
+				/////////////add data for chart
+				ratePerGram = this.calculateCentsPerProteinGram(price, proteinAmount );
+				console.log(ratePerGram);
+				this.addChartData(priceChart, [this.product.product], ratePerGram);
+
+
+				//Clear Form
+				this.product.proteinAmount = '';
+				this.product.product = '';
+				this.product.price = '';
+
+			},
+			//calculateCentsPerProteinGram(index){
+				//centsPerProteinGram = Number.parseFloat( (((parseFloat(this.products[index].price)*100)/parseFloat(this.products[index].proteinAmount))/100) ).toFixed(2);
+
+				
+
+
+				//return centsPerProteinGram;
+                  
+			//},
+			calculateCentsPerProteinGram(price, proteinAmount){
+				centsPerProteinGram = Number.parseFloat( (((parseFloat(price)*100)/parseFloat(proteinAmount))/100) ).toFixed(2);
+
+				
+
+
+				return centsPerProteinGram;
+                  
+			},
+			removeProduct(index){
+				this.products.splice(index, 1);
+			},
+			addChartData(chart, label, data){
+				chart.data.labels.push(label);
+				chart.data.datasets.forEach((dataset) =>{ 
+					dataset.data.push(data);
+					});
+				chart.update();
+
+			}
+		}
+	});
+
+
+
+
+	///////////////////Add Chart
+	let myChart = document.getElementById('myChart').getContext('2d');
+	let priceChart = new Chart(myChart, {
+		type: 'bar',
+		data:{
+			labels:[],
+			datasets:[{
+				label:"Products",
+				data: [],
+				backgroundColor: 'blue'
+			}]
+		},
+		options:{}
+
+	});
+	////////////////////////////////////////////////////////////////
+
+
+</script>
+<script src="js/jquery-3.4.1.js"></script>
+<script src="js/popper.min.js"></script>
+<script src="js/bootstrap.js"></script>
+</body>
+</html>
