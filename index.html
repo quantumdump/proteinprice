@@ -8,9 +8,12 @@
 </head>
 <body>
 <div id="app">
-	<h1>{{title}}</h1>
-	<div class="col-sm-12">
+	
+	<div class="container col-sm-12">
+		<div class="row justify-content-center">
+
 	<div class="col-4">
+		<h1 class="text-center">{{title}}</h1>
 			<div class="card">
 		<div class="card-body">
 			<div class="form">
@@ -38,12 +41,13 @@
 		</div>
 	</div>
 	</div>
-	</div>
-	<div class="col-sm-12" v-if="products.length>0">
-		<div class="col-sm-4 note" v-for="(product, index) in products">
+
+	<div class="col-sm-4" v-if="products.length>0">
+		<div class="col-sm-8 note" v-for="(product, index) in products">
 			<div class="card">
 				<div class="card-block">
-					<button class="close" @click=removeProduct(index)>&times;</button>
+					<!-- make pricechart reactive -->
+					<button class="close" @click="removeProduct(index, product.product)">&times;</button>
 				<h4 class="card-title">{{product.product}}</h4>
 				<p class="card-text">
 					{{calculateCentsPerProteinGram(product.price, product.proteinAmount)}}$ for 1 gram of Protein
@@ -52,6 +56,9 @@
 		</div>
 		</div>
 	</div>
+	</div>
+	</div>
+
 	<div class="card">
 		<h5>Toggle Chart</h5>
 <div class="container" id="toggleHider">
@@ -100,15 +107,7 @@
 				this.product.price = '';
 
 			},
-			//calculateCentsPerProteinGram(index){
-				//centsPerProteinGram = Number.parseFloat( (((parseFloat(this.products[index].price)*100)/parseFloat(this.products[index].proteinAmount))/100) ).toFixed(2);
-
-				
-
-
-				//return centsPerProteinGram;
-                  
-			//},
+			/////////////////
 			calculateCentsPerProteinGram(price, proteinAmount){
 				centsPerProteinGram = Number.parseFloat( (((parseFloat(price)*100)/parseFloat(proteinAmount))/100) ).toFixed(2);
 
@@ -118,15 +117,34 @@
 				return centsPerProteinGram;
                   
 			},
-			removeProduct(index){
+			/////////////|Remove product
+			removeProduct(index, label){
+				this.removeChartData(label);
 				this.products.splice(index, 1);
 			},
+			///////////Add to chart
 			addChartData(chart, label, data){
 				chart.data.labels.push(label);
 				chart.data.datasets.forEach((dataset) =>{ 
 					dataset.data.push(data);
 					});
 				chart.update();
+
+			},
+			////Remove from chart
+			removeChartData(label){
+				// console.log(priceChart.data.datasets[0]);
+				// let removalIndex = priceChart.data.datasets.indexOf(label);
+				// if (removalIndex>=0) {
+				// 	priceChart.data.datasets.splice(removalIndex, 1);
+				// 	console.log("success");
+				// }else{
+				// 	console.log("fck");
+				// }
+				priceChart.data.datasets = priceChart.data.datasets.filter(function(obj){
+					return (obj.label != label);
+				});
+				priceChart.update();
 
 			}
 		}
